@@ -1,0 +1,61 @@
+---
+title: "Thesis"
+author: "Conor Lacey"
+date: '2023-02-26'
+output: html_document
+---
+
+```{r packages}
+rm(list = ls())
+suppressWarnings(library(tidyverse))
+suppressWarnings(library(faux))
+```
+
+
+### Introduction 
+
+So this is meant to demonstrate how dMACS_Shrunk should theoretically work with some fake data I created. In this demonstration I will demonstate this method with just one item for simplicity sake.
+
+### Fake Data
+
+```{r fake-data}
+set.seed(1489)
+
+fakedatR <- rnorm_multi(n = 500, 
+                          mu = c(5, 4), 
+                          sd = c(1, 1), 
+                          r = c(0.1), 
+                          varnames = c("Eta", "Response"))
+
+fakedatR$Response <- fakedatR$Response %>% round()
+fakedatR$Response <- if_else(fakedatR$Response > 10, 10, fakedatR$Response)
+
+fakedatR <- fakedatR %>% mutate (group = "R")
+
+fakedatF <- rnorm_multi(n = 500, 
+                          mu = c(5,8), 
+                          sd = c(1, 1), 
+                          r = c(0.9), 
+                          varnames = c("Eta", "Response"))
+
+fakedatF$Response <- fakedatF$Response %>% round()
+fakedatF$Response <- if_else(fakedatF$Response > 10, 10, fakedatF$Response)
+
+fakedatF <- fakedatF %>% mutate (group = "F")
+
+fakedat <- bind_rows(fakedatR, fakedatF)
+
+fakedat %>% ggplot(aes(x = Eta, y = Response, color = group)) + 
+  geom_point(alpha = 0.4) + 
+  stat_smooth(method = lm, se = FALSE, linewidth = 1.5) + 
+  labs(x = "Latent Trait",
+       color = "Group") + 
+  scale_color_discrete(labels = c("Focal", "Reference"))
+```
+
+Cool. Fake data created awesome. To clarify I have to add the participants estimated latent score for the reference group given that the formula requires this in the calculation. The estimated latent score must of course also correlate with the item hence why I use the rnorm_multi() function from the "faux" package. However, the bigger picture that should be seen here is that there is clearly and interaction effect which what group you belong to. The group assignment is clearly affecting the item's loading and intercept. 
+
+### Calculating dMACS
+
+
+
