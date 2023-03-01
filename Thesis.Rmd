@@ -1,8 +1,8 @@
 ---
-title: "Thesis"
+title: "dMACS_Shrunk Example"
 author: "Conor Lacey"
 date: '2023-02-26'
-output: html_document
+output: github_document
 ---
 
 ```{r packages}
@@ -53,9 +53,14 @@ fakedat %>% ggplot(aes(x = Eta, y = Response, color = group)) +
   scale_color_discrete(labels = c("Focal", "Reference"))
 ```
 
-Cool. Fake data created awesome. To clarify I have to add the participants estimated latent score for the reference group given that the formula requires this in the calculation. The estimated latent score must of course also correlate with the item hence why I use the rnorm_multi() function from the "faux" package. However, the bigger picture that should be seen here is that there is clearly and interaction effect which what group you belong to. The group assignment is clearly affecting the item's loading and intercept. 
+Awesome. Fake data created. To clarify I have to add the participants estimated latent score for the reference group given that the formula requires this in the calculation. The estimated latent score must of course also correlate with the item hence why I use the rnorm_multi() function from the "faux" package. However, the bigger picture that should be seen here is that there is clearly and interaction effect which what group you belong to. The group assignment is clearly affecting the item's loading and intercept. 
 
 ### Calculating dMACS
+
+```{r dMACS}
+
+```
+
 
 
 
