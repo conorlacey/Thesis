@@ -14,7 +14,7 @@ suppressWarnings(library(faux))
 
 ### Introduction 
 
-So this is meant to demonstrate how dMACS_Shrunk should theoretically work with some fake data I created. In this demonstration I will demonstate this method with just one item for simplicity sake.
+So this is meant to demonstrate how dMACS_Shrunk should theoretically work with some fake data I created. In this demonstration I use just one item for simplicity sake.
 
 ### Fake Data
 
@@ -79,6 +79,7 @@ integrand <- function(x){
 
 dMACS<-sqrt(integrate(integrand, -Inf, Inf)$value)/den
 
+dMACS
 ```
 
 Phew! That's pretty dang big. I suspect it's not typical to find a value this large, however for the purposes of this example we can definitley say that this item in non-invariant. However, now let's see how much is shrunk using the spike-and-slab method
