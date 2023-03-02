@@ -85,8 +85,7 @@ dMACS
 Phew! That's pretty dang big. I suspect it's not typical to find a value this large, however for the purposes of this example we can definitley say that this item in non-invariant. However, now let's see how much is shrunk using the spike-and-slab method
 
 ### Spike-and-Slab
-```{r}
-
+```{r Spike-and-Slab}
 
 ```
 
