@@ -85,3 +85,38 @@ which what group you belong to. The group assignment is clearly
 affecting the item’s loading and intercept.
 
 ### Calculating dMACS
+
+``` r
+eta<-seq(0,8, by = 0.5)
+linearR <- lm(fakedatR$Response ~ fakedatR$Eta)
+linearF <- lm(fakedatF$Response ~ fakedatF$Eta)
+
+aR <- linearR$coefficients[1]
+bR <- linearR$coefficients[2]
+
+aF <- linearF$coefficients[1]
+bF <- linearF$coefficients[2]
+
+a <- ((nrow(fakedatR)-1)*sd(fakedatR$Response))+((nrow(fakedatF)-1)*sd(fakedatF$Response))
+b <- (nrow(fakedatR)-1) + (nrow(fakedatF)-1) 
+
+den <- a/b
+
+integrand <- function(x){
+  (((aF + bF*x))-(aR + bR*x))*dnorm(x,5,1)
+}
+
+
+dMACS<-(sqrt(integrate(integrand, -Inf, Inf)$value))/(den)
+
+dMACS
+```
+
+    ## [1] 1.937263
+
+Phew! That’s pretty dang big. I suspect it’s not typical to find a value
+this large, however for the purposes of this example we can definitley
+say that this item in non-invariant. However, now let’s see how much is
+shrunk using the spike-and-slab method
+
+### Spike-and-Slab
