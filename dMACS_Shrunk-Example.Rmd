@@ -74,7 +74,7 @@ b <- (nrow(fakedatR)-1) + (nrow(fakedatF)-1)
 den <- a/b
 
 integrand <- function(x){
-  ((aF + bF*x)-(aR + bR*x))*dnorm(x,5,1)
+  ((aF + bF*x)-(aR + bR*x))^2*dnorm(x,5,1)
 }
 
 dMACS<-sqrt(integrate(integrand, -Inf, Inf)$value)/den
