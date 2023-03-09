@@ -28,6 +28,11 @@ suppressWarnings(library(faux))
     ## - Get and set global package options with: faux_options()
     ## ************
 
+``` r
+suppressWarnings(library(skimr))
+suppressWarnings(library(lsr))
+```
+
 ### Introduction
 
 So this is meant to demonstrate how dMACS_Shrunk should theoretically
@@ -51,7 +56,7 @@ fakedatR$Response <- if_else(fakedatR$Response > 10, 10, fakedatR$Response)
 fakedatR <- fakedatR %>% mutate (group = "R")
 
 fakedatF <- rnorm_multi(n = 500, 
-                          mu = c(5,8), 
+                          mu = c(5, 8), 
                           sd = c(1, 1), 
                           r = c(0.9), 
                           varnames = c("Eta", "Response"))
@@ -65,7 +70,7 @@ fakedat <- bind_rows(fakedatR, fakedatF)
 
 fakedat %>% ggplot(aes(x = Eta, y = Response, color = group)) + 
   geom_point(alpha = 0.4) + 
-  stat_smooth(method = lm, se = FALSE, linewidth = 1.5) + 
+  stat_smooth(method = lm, se = FALSE) +
   labs(x = "Latent Trait",
        color = "Group") + 
   scale_color_discrete(labels = c("Focal", "Reference"))
@@ -103,15 +108,15 @@ b <- (nrow(fakedatR)-1) + (nrow(fakedatF)-1)
 den <- a/b
 
 integrand <- function(x){
-  ((aF + bF*x)-(aR + bR*x))*dnorm(x,5,1)
-}
+  ((aF + bF*x)-(aR + bR*x))^2*dnorm(x,5,1)
+  }
 
 dMACS<-sqrt(integrate(integrand, -Inf, Inf)$value)/den
 
 dMACS
 ```
 
-    ## [1] 1.937263
+    ## [1] 3.860272
 
 Phew! That’s pretty dang big. I suspect it’s not typical to find a value
 this large, however for the purposes of this example we can definitley
@@ -148,15 +153,33 @@ there is a mean dMACS of 0 and an standard deviation of 1.
 ``` r
 priorPH0 <- 0.5
 sigmaSlab <- 1
-N <- nrow(fakedat)/2
+n <- nrow(fakedat)/2
 
-sd = 4
+integrand <- function(x){
+  
+diff<-(aF + bF*x)-(aR + bR*x)
 
-diff = 8
+ybar<-sqrt((diff)^2)/den
 
-den = 1/2
+prec <- (n+ 1 / sigmaSlab)
+v1 <- 1 / prec
 
-sqrt((diff^2*den))/sd
+c <- n * ybar
+mu1 <- v1 * c
+
+a <- 1 / sqrt(n * (sigmaSlab + 1))
+b <- n^2 * ybar^2
+c <- 2 * (n + 1 / sigmaSlab)
+w<-a * exp(b / c)
+rho1 <- priorPH0/ (priorPH0 + (1 - priorPH0) * w)
+
+UpDiff <- mu1*(1-rho1)*den
+
+UpDiff*dnorm(x,5,1)
+}
+
+dMACS_shrunk<-integrate(integrand, -Inf,Inf)$value/den
+dMACS_shrunk
 ```
 
-    ## [1] 1.414214
+    ## [1] 3.796814

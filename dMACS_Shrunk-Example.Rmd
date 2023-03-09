@@ -9,6 +9,8 @@ output: github_document
 rm(list = ls())
 suppressWarnings(library(tidyverse))
 suppressWarnings(library(faux))
+suppressWarnings(library(skimr))
+suppressWarnings(library(lsr))
 ```
 
 
@@ -33,7 +35,7 @@ fakedatR$Response <- if_else(fakedatR$Response > 10, 10, fakedatR$Response)
 fakedatR <- fakedatR %>% mutate (group = "R")
 
 fakedatF <- rnorm_multi(n = 500, 
-                          mu = c(5,8), 
+                          mu = c(5, 8), 
                           sd = c(1, 1), 
                           r = c(0.9), 
                           varnames = c("Eta", "Response"))
@@ -47,7 +49,7 @@ fakedat <- bind_rows(fakedatR, fakedatF)
 
 fakedat %>% ggplot(aes(x = Eta, y = Response, color = group)) + 
   geom_point(alpha = 0.4) + 
-  stat_smooth(method = lm, se = FALSE, linewidth = 1.5) + 
+  stat_smooth(method = lm, se = FALSE) +
   labs(x = "Latent Trait",
        color = "Group") + 
   scale_color_discrete(labels = c("Focal", "Reference"))
@@ -74,21 +76,21 @@ b <- (nrow(fakedatR)-1) + (nrow(fakedatF)-1)
 den <- a/b
 
 integrand <- function(x){
-  ((aF + bF*x)-(aR + bR*x))*dnorm(x,5,1)
-}
+  ((aF + bF*x)-(aR + bR*x))^2*dnorm(x,5,1)
+  }
 
 dMACS<-sqrt(integrate(integrand, -Inf, Inf)$value)/den
 
 dMACS
 ```
 
+
 Phew! That's pretty dang big. I suspect it's not typical to find a value this large, however for the purposes of this example we can definitley say that this item in non-invariant. However, now let's see how much is shrunk using the spike-and-slab method
 
 ### Spike-and-Slab
 
 First let's borrow some functions from the Bergh paper. 
-```{r Functions}
-
+```{r Bergh Functions}
 bf <- function(d, n, v0) {
   a <- 1 / sqrt(n * (v0 + 1))
   b <- n^2 * d^2
@@ -112,14 +114,32 @@ Let's update our parameters. For this type of study, we will go with the same as
 ```{r Update}
 priorPH0 <- 0.5
 sigmaSlab <- 1
-N <- nrow(fakedat)/2
+n <- nrow(fakedat)/2
 
-sd = 4
+integrand <- function(x){
+  
+diff<-(aF + bF*x)-(aR + bR*x)
 
-diff = 8
+ybar<-sqrt((diff)^2)/den
 
-den = 1/2
+prec <- (n+ 1 / sigmaSlab)
+v1 <- 1 / prec
 
-sqrt((diff^2*den))/sd
+c <- n * ybar
+mu1 <- v1 * c
+
+a <- 1 / sqrt(n * (sigmaSlab + 1))
+b <- n^2 * ybar^2
+c <- 2 * (n + 1 / sigmaSlab)
+w<-a * exp(b / c)
+rho1 <- priorPH0/ (priorPH0 + (1 - priorPH0) * w)
+
+UpDiff <- mu1*(1-rho1)*den
+
+UpDiff*dnorm(x,5,1)
+}
+
+dMACS_shrunk<-integrate(integrand, -Inf,Inf)$value/den
+dMACS_shrunk
 ```
 
