@@ -81,6 +81,8 @@ integrand <- function(x){
 
 dMACS<-sqrt(integrate(integrand, -Inf, Inf)$value)/den
 
+cohensD(fakedatF$Response, fakedatR$Response)
+
 dMACS
 ```
 
