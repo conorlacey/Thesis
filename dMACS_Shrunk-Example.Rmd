@@ -53,6 +53,31 @@ fakedat %>% ggplot(aes(x = Eta, y = Response, color = group)) +
   labs(x = "Latent Trait",
        color = "Group") + 
   scale_color_discrete(labels = c("Focal", "Reference"))
+
+nrow(fakedat)
+
+for (i in 1:1000){
+  if (fakedat$group[i] == "F"){
+    fakedat$Response[i] <- fakedat$Response[i] - 3
+  }
+  else{
+    fakedat$Response[i] <- fakedat$Response[i]
+  }
+}
+
+fakedat %>% ggplot(aes(x = group, y = Response)) + 
+  geom_point(alpha = 0.4) 
+
+fakedat %>% ggplot(aes(x = Eta, y = Response, color = group)) + 
+  geom_point(alpha = 0.4) + 
+  stat_smooth(method = lm, se = FALSE) +
+  labs(x = "Latent Trait",
+       color = "Group") + 
+  scale_color_discrete(labels = c("Focal", "Reference"))
+
+fakedatF$Response <- fakedatF$Response - 3
+
+cohensD(fakedatF$Response,fakedatR$Response)
 ```
 
 Awesome. Fake data created. To clarify I have to add the participants estimated latent score for the reference group given that the formula requires this in the calculation. The estimated latent score must of course also correlate with the item hence why I use the rnorm_multi() function from the "faux" package. However, the bigger picture that should be seen here is that there is clearly an interaction effect based on what group you belong to. The group assignment is clearly affecting the item's loading and intercept. 
