@@ -6,7 +6,6 @@ lapply(packages, library, character.only=TRUE)
 measures.dat <- matrix(nrow = 1000, ncol = 2) %>% data.frame() %>% 
   setNames(c("dMACS", "CohensD"))
 
-
 # Means -------------------------------------------------------------------
 set.seed(3602)
 
@@ -33,7 +32,7 @@ linear.2<-lm(fake.dat.2$y~fake.dat.2$x)
 
 integrand <- function(x){
   product <-(linear.1$coefficients[1] + linear.1$coefficients[2]*x) - (linear.2$coefficients[1] + linear.2$coefficients[2]*x)
-  return(product*dnorm(x,1,1))
+  return((product^2)*dnorm(x,1,1))
 }
 
 a <- (nrow(fake.dat.1)-1)*sd(fake.dat.1$y)+(nrow(fake.dat.2)-1)*sd(fake.dat.2$y)
@@ -41,7 +40,7 @@ b <- (nrow(fake.dat.1)-1) + (nrow(fake.dat.2)-1)
 
 den <- a/b
 
-a<-integrate(integrand, -Inf, Inf)$value/den
+a<-sqrt(integrate(integrand, -Inf, Inf)$value)/den
 
 b<-cohensD(fake.dat.1$y, fake.dat.2$y)
 
@@ -97,7 +96,7 @@ for (j in 1:length(m)){
     
     integrand <- function(x){
       product <-(linear.1$coefficients[1] + linear.1$coefficients[2]*x) - (linear.2$coefficients[1] + linear.2$coefficients[2]*x)
-      return(product*dnorm(x,1,1))
+      return((product^2)*dnorm(x,1,1))
     }
     
     a <- (nrow(fake.dat.1)-1)*sd(fake.dat.1$y)+(nrow(fake.dat.2)-1)*sd(fake.dat.2$y)
@@ -105,7 +104,7 @@ for (j in 1:length(m)){
     
     den <- a/b
     
-    a<-integrate(integrand, -Inf, Inf)$value/den
+    a<-sqrt(integrate(integrand, -Inf, Inf)$value)/den
     
     b<-cohensD(fake.dat.1$y, fake.dat.2$y)
     

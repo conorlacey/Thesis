@@ -31,7 +31,7 @@ m2 <- lm(y2~x2)
 
 integrand <- function(x){
   product <-(m1$coefficients[1] + m1$coefficients[2]*x) - (m2$coefficients[1] + m2$coefficients[2]*x)
-  return(product*dnorm(x,0,1))
+  return((product^2)*dnorm(x,0,1))
 }
 
 a <- (nrow(fake.dat.1)-1)*sd(fake.dat.1$y1)+(nrow(fake.dat.1)-1)*sd(fake.dat.1$y2)
@@ -60,25 +60,14 @@ int.dat %>% ggplot(aes(x = intercept, y = correlation)) +
 
 # Intercept and Average Estimates
 int.dat %>% ggplot(aes(x = intercept)) + 
-            geom_line(aes(y = average.dMAC, color = "dMACS"),
-                          linewidth = 1, alpha = 0.5) + 
-            geom_line(aes(y = average.cohensD, color = "Cohen's D"),
-                               linewidth = 1, alpha = 0.5) + 
-            ylab("Average Estimate") + 
-            scale_color_manual(name = "",
-                               breaks = c("dMACS", "Cohen's D"),
-                               values = c("dMACS" = "blue", "Cohen's D" = "red"))
-
-
-cof.dat %>% ggplot(aes(x = regression)) + 
-            geom_line(aes(y = average.dMAC, color = "dMACS"),
-                          linewidth = 1, alpha = 0.5) + 
-            geom_line(aes(y = average.cohensD, color = "Cohen's D"),
-                          linewidth = 1, alpha = 0.5) + 
-            ylab("Average Estimate") + 
-            scale_color_manual(name = "",
-                              breaks = c("dMACS", "Cohen's D"),
-                              values = c("dMACS" = "blue", "Cohen's D" = "red"))
+  geom_line(aes(y = average.dMAC, color = "dMACS"),
+            linewidth = 1, alpha = 0.5) + 
+  geom_line(aes(y = average.cohensD, color = "Cohen's D"),
+            linewidth = 1, alpha = 0.5) + 
+  ylab("Average Estimate") + 
+  scale_color_manual(name = "",
+                     breaks = c("dMACS", "Cohen's D"),
+                     values = c("dMACS" = "blue", "Cohen's D" = "red"))
 
 # Regression Coefficient --------------------------------------------------
 set.seed(3602)
@@ -104,7 +93,7 @@ for (j in 1:length(n)){
     
     integrand <- function(x){
       product <-(m1$coefficients[1] + m1$coefficients[2]*x) - (m2$coefficients[1] + m2$coefficients[2]*x)
-      return(product*dnorm(x,0,1))
+      return((product^2)*dnorm(x,0,1))
     }
     
     a <- (nrow(fake.dat.1)-1)*sd(fake.dat.1$y1)+(nrow(fake.dat.1)-1)*sd(fake.dat.1$y2)
@@ -112,7 +101,7 @@ for (j in 1:length(n)){
     
     den <- a/b
     
-    c<-integrate(integrand, -Inf, Inf)$value/den
+    c<-sqrt(integrate(integrand, -Inf, Inf)$value)/den
     
     d<-cohensD(y1,y2)
     
