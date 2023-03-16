@@ -118,11 +118,9 @@ for (j in 1:length(m)){
   r.dat$correlation[j] <- cor(measures.dat$dMACS, measures.dat$CohensD)
 }
 
-
 #R value and correlation plot
 r.dat %>% ggplot(aes(x = RValue, y = correlation)) + 
   geom_line()
-
 
 #R value and Average Estimates Plot
 r.dat %>% ggplot(aes(x = RValue)) + 
@@ -134,6 +132,23 @@ r.dat %>% ggplot(aes(x = RValue)) +
   scale_color_manual(name = "",
                      breaks = c("dMACS", "Cohen's D"),
                      values = c("dMACS" = "blue", "Cohen's D" = "red"))
+
+
+integrand <- function(x){
+  product <-(0 + .6*x) - (1 + 1.2*x)
+  return((product^2)*dnorm(x,0,577.3719))
+}
+
+a <- ((40001-1)*346.4232)+((40001-1)*692.8463)
+b <- (40001-1) + (40001-1) 
+
+den <- a/b
+
+den
+
+sqrt(integrate(integrand, -Inf, Inf)$value)/den
+
+
 
 
 

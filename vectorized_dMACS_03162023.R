@@ -2,7 +2,7 @@ set.seed(55555)
 
 library(dmacs)
 
-eta <- seq(-1000,1000, by = .005) #Generate true scores
+eta <- seq(-1000,1000, by = .1) #Generate true scores
 load.R <- .6 #loading for the reference group
 load.F <- 1.2 #loading for focal group
 int.R <- 0 #intercept for reference group
@@ -41,6 +41,17 @@ item_dmacs(.6, #loading, R
 #as well as the latent variable (eta)
 
 
+# dMACS.freq <- function(outcome.R, outcome.F, eta) {
+#   sq.diff <- (outcome.R - outcome.F)^2 #Difference between trace lines, squared
+#   f.eta <- dnorm(eta, mean(eta), sd(eta)) #Normal density of eta
+#   f.eta <- f.eta/sum(f.eta) #Currently WRONG -- trying in vain to normalize the density of eta
+#   inside.sqrt <- sum(sq.diff*f.eta) #Also probably wrong everything inside the square root sign -- i.e., the difference between trace lines integrated over the density of eta
+#   sd.pooled.num <- ((length(outcome.R)-1)*sd(outcome.R)) + ((length(outcome.F)-1)*sd(outcome.F))
+#   sd.pooled.denom <- (length(outcome.R)-1) + (length(outcome.F)-1)
+#   sd.pooled <- sd.pooled.num/sd.pooled.denom
+#   sqrt(inside.sqrt)/sd.pooled
+# }
+
 dMACS.freq <- function(outcome.R, outcome.F, eta) {
   sq.diff <- (outcome.R - outcome.F)^2 #Difference between trace lines, squared
   f.eta <- dnorm(eta, mean(eta), sd(eta)) #Normal density of eta
@@ -51,3 +62,23 @@ dMACS.freq <- function(outcome.R, outcome.F, eta) {
   sd.pooled <- sd.pooled.num/sd.pooled.denom
   sqrt(inside.sqrt)/sd.pooled
 }
+
+dMACS.freq(y.R,y.F, eta)
+
+# My Edits ----------------------------------------------------------------
+
+dMACS.freq <- function(outcome.R, outcome.F, eta) {
+  sq.diff <- (outcome.R - outcome.F)^2 #Difference between trace lines, squared
+  integrand <- function(x){
+    product<-(load.R*x + int.R) - (load.F*x + int.F)
+    return((product^2)*dnorm(x,mean(eta), sd(eta)))
+  }
+  inside.sqrt<- integrate(integrand, (min(eta)-10000), (max(eta)+10000))$value
+  sd.pooled.num <- ((length(outcome.R)-1)*sd(outcome.R)) + ((length(outcome.F)-1)*sd(outcome.F))
+  sd.pooled.denom <- (length(outcome.R)-1) + (length(outcome.F)-1)
+  sd.pooled <- sd.pooled.num/sd.pooled.denom
+  sqrt(inside.sqrt)/sd.pooled
+}
+dMACS.freq(y.R,y.F, eta)
+
+

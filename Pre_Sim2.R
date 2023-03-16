@@ -77,9 +77,9 @@ cof.dat <- matrix(nrow = length(n), ncol = 2) %>% data.frame() %>%
 
 for (j in 1:length(n)){
   for (i in 1:nrow(measures.dat)){
-    x1=rnorm(100,0,1)
-    x2=rnorm(100,0,1)
-    error=rnorm(100,0,5)
+    x1=rnorm(100,0,5)
+    x2=rnorm(100,0,5)
+    error=rnorm(100,0,1)
     
     y1<- 1+(n[j]*x1)+error
     y2<- 1+(1*x2)+error
@@ -89,7 +89,6 @@ for (j in 1:length(n)){
     
     m1 <- lm(y1~x1)
     m2 <- lm(y2~x2)
-    
     
     integrand <- function(x){
       product <-(m1$coefficients[1] + m1$coefficients[2]*x) - (m2$coefficients[1] + m2$coefficients[2]*x)
