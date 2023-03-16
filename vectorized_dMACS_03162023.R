@@ -68,7 +68,12 @@ dMACS.freq(y.R,y.F, eta)
 # My Edits ----------------------------------------------------------------
 
 dMACS.freq <- function(outcome.R, outcome.F, eta) {
-  sq.diff <- (outcome.R - outcome.F)^2 #Difference between trace lines, squared
+  lm.R <- lm(outcome.R ~ eta)$coefficients
+  lm.F <- lm(outcome.F ~ eta)$coefficients
+  load.R <- lm.R[2]
+  int.R <- lm.R[1]
+  load.F <- lm.F[2]
+  int.F <- lm.F[2]
   integrand <- function(x){
     product<-(load.R*x + int.R) - (load.F*x + int.F)
     return((product^2)*dnorm(x,mean(eta), sd(eta)))
@@ -80,5 +85,6 @@ dMACS.freq <- function(outcome.R, outcome.F, eta) {
   sqrt(inside.sqrt)/sd.pooled
 }
 dMACS.freq(y.R,y.F, eta)
+
 
 
