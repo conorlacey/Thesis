@@ -1,26 +1,34 @@
----
-title: "Portfolio 4"
-author: "Conor Lacey"
-date: '2023-03-17'
-output: github_document
----
+Portfolio 4
+================
+Conor Lacey
+2023-03-17
 
 ### Libraries
 
-```{r}
+``` r
 suppressWarnings(library(tidyverse))
+```
+
+    ## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.2 ──
+    ## ✔ ggplot2 3.4.0     ✔ purrr   0.3.4
+    ## ✔ tibble  3.1.8     ✔ dplyr   1.0.8
+    ## ✔ tidyr   1.1.4     ✔ stringr 1.4.0
+    ## ✔ readr   2.1.3     ✔ forcats 0.5.1
+    ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ✖ dplyr::filter() masks stats::filter()
+    ## ✖ dplyr::lag()    masks stats::lag()
+
+``` r
 library(dmacs)
 ```
 
-
-
 ### Introduction
 
-This portfolio will demonstrate how dMACS shrunk works with code. 
+This portfolio will demonstrate how dMACS shrunk works with code.
 
-### Create invariant items 
+### Create invariant items
 
-```{r fake data}
+``` r
 set.seed(55555)
 
 N.R <- 1000
@@ -52,9 +60,10 @@ sd.pooled.test <- sd.pooled.test.num/sd.pooled.test.denom
 
 ### Calculate initial observed dMACS
 
-The method I demonstrate here is the method created by Nye & Drasgow, (2011)
+The method I demonstrate here is the method created by Nye & Drasgow,
+(2011)
 
-```{r dMACS}
+``` r
 item_dmacs(.6, #loading, R 
       1.2, #loading, F
       0, #intercept, R
@@ -65,11 +74,13 @@ item_dmacs(.6, #loading, R
       )
 ```
 
-### Update Parameter 
+    ## [1] 1.310747
 
-Ok now I will define some function's from Bergh et al., (2021).
+### Update Parameter
 
-```{r functions}
+Ok now I will define some function’s from Bergh et al., (2021).
+
+``` r
 get.dMACS <- function(outcome.R, outcome.F, eta.R = eta.R, eta.F = eta.F) {
   lm.R <- lm(outcome.R ~ eta.R)$coefficients
   lm.F <- lm(outcome.F ~ eta.F)$coefficients
@@ -143,10 +154,9 @@ updatePar <- function(rho0, v0, N, ybar) {
 }
 ```
 
-
 ### Update Paramenter
 
-```{r Update Parameter}
+``` r
 priorPH0  <- 0.5
 sigmaSlab <- 1
 
@@ -167,14 +177,21 @@ names(tbExplicit) <- c("ph0", "mu1", "sd1", "Lower", "Upper", "modelAveraged")
 tbExplicit
 ```
 
-Ta da! So we get the posterior mean dMACs estimate of 1.309 which is about the same as the original esimate calculated. Now all that's is left to do multiply this by the posterior probability of dMACS having a real effect which is 1 - Ph0(the probability that there is an effect of zero). 
+    ##   ph0      mu1        sd1    Lower    Upper modelAveraged
+    ## 1   0 1.309438 0.03160698 1.247489 1.371386      1.309438
 
-```{r dMACS_Shrunk}
+Ta da! So we get the posterior mean dMACs estimate of 1.309 which is
+about the same as the original esimate calculated. Now all that’s is
+left to do multiply this by the posterior probability of dMACS having a
+real effect which is 1 - Ph0(the probability that there is an effect of
+zero).
+
+``` r
 dMACS_Shrunk <- (1-tbExplicit[1])*tbExplicit[2]
 dMACS_Shrunk
 ```
 
+    ##        ph0
+    ## 1 1.309438
+
 And there we have it! dMACS_Shrunk in action!
-
-
-
