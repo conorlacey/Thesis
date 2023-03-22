@@ -12,8 +12,6 @@ suppressWarnings(library(tidyverse))
 library(dmacs)
 ```
 
-
-
 ### Introduction
 
 This portfolio will demonstrate how dMACS shrunk works with code. 
