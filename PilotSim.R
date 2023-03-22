@@ -75,6 +75,7 @@ updatePar <- function(rho0, v0, N, ybar) {
   return(c("ph0" = rho1, "mu" = mu1, "sd" = sqrt(v1)))
 }
 
+
 # Simulations -------------------------------------------------------------
 # measures <- matrix(nrow = 1000, ncol = 2) %>% data.frame() %>% 
 #   setNames(c("dMACS", "dMACS_Shrunk"))
@@ -158,8 +159,12 @@ dMACS_Shrunk
 # cor(measures$dMACS,measures$dMACS_Shrunk)
 
 
-# dMACS Conditions --------------------------------------------------------
 
+# dMACS Conditions --------------------------------------------------------
+{
+## dMACS = .10 ------------------------------
+{
+### Means Equal  --------------
 set.seed(7029)
 
 N.R <- 1000
@@ -177,9 +182,9 @@ eta.F <- rnorm(N.F, mean.F, sd.F)
 
 #eta <- seq(-1000,1000, by = 10) #Generate true scores
 load.R <- .6 #loading for the reference group
-load.F <- .59 #loading for focal group
+load.F <- .634 #loading for focal group
 int.R <- 0 #intercept for reference group
-int.F <- 0 #intercept for focal group
+int.F <- 0.05 #intercept for focal group
 
 y.R <- load.R*eta.R + int.R #model-implied scores for reference group
 y.F <- load.F*eta.F+ int.F #model-implied scores for focal group
@@ -216,22 +221,298 @@ dMACS <- item_dmacs(load.R, #loading, R
 
 dMACS
 
-#dMACS_Shrunk
-priorPH0  <- 0.5
-sigmaSlab <- 1
+### Means Unequal  --------------
+set.seed(7029)
 
-ybarExpl <- get.dMACS(y.R, y.F, eta.R, eta.F)
-ybarExpl
+N.R <- 1000
+N.F <- 1000
 
-nExpl <- length(y.R)
+mean.R <- 0
+mean.F <- 1
 
-upMAExpl <- updatePar(priorPH0, sigmaSlab, nExpl, ybarExpl[1L])
-ciMAExpl <- postStat(upMAExpl)
+sd.R <- 1
+sd.F <- 1
 
-tbExplicit <- data.frame(t(c(upMAExpl, ciMAExpl)))
-names(tbExplicit) <- c("ph0", "mu1", "sd1", "Lower", "Upper", "modelAveraged")
+#Set up latent variable
+eta.R <- rnorm(N.R, mean.R, sd.R)
+eta.F <- rnorm(N.F, mean.F, sd.F)
 
-dMACS_Shrunk <- (1-tbExplicit[1])*tbExplicit[2]
+#eta <- seq(-1000,1000, by = 10) #Generate true scores
+load.R <- .6 #loading for the reference group
+load.F <- .61 #loading for focal group
+int.R <- 0 #intercept for reference group
+int.F <- 0.05 #intercept for focal group
 
-dMACS_Shrunk
+y.R <- load.R*eta.R + int.R #model-implied scores for reference group
+y.F <- load.F*eta.F+ int.F #model-implied scores for focal group
 
+datR <- data.frame(eta = eta.R, y = y.R, group = "R")
+datF <- data.frame(eta = eta.F, y = y.F, group = "F")
+dat  <- bind_rows(datR,datF) 
+
+dat %>% ggplot(aes(x = eta, y = y, color = group)) +
+  geom_line(linewidth = 1) + 
+  labs(x = "Eta",
+       y = "Estimated Response") + 
+  geom_line(data = datF, 
+            aes(x = eta, y = dnorm(eta, mean(eta), sd(eta)), color = NULL),
+            linetype = "dashed") + 
+  xlim(-3,3) +
+  ylim(0,1.2)
+
+
+
+sd.pooled.test.num <- ((length(y.R)-1)*sd(y.R)) + ((length(y.F)-1)*sd(y.F)) 
+sd.pooled.test.denom <- (length(y.R) - 1) + (length(y.F) - 1)
+sd.pooled.test <- sd.pooled.test.num/sd.pooled.test.denom
+
+#dMACS
+dMACS <- item_dmacs(load.R, #loading, R 
+                    load.F, #loading, F
+                    int.R, #intercept, R
+                    int.F, #intercept, F
+                    mean(eta.F), #mean (both groups)
+                    var(eta.F), #variance (both groups, but it would be the focal group if they didn't have the same variance)
+                    sd.pooled.test #pooled standard deviation (again, this is basically arbitrary)
+)
+
+dMACS
+
+}
+## dMACS = .50 ------------------------------
+{
+### Means Equal  --------------
+set.seed(7029)
+
+N.R <- 1000
+N.F <- 1000
+
+mean.R <- 0
+mean.F <- 0
+
+sd.R <- 1
+sd.F <- 1
+
+#Set up latent variable
+eta.R <- rnorm(N.R, mean.R, sd.R)
+eta.F <- rnorm(N.F, mean.F, sd.F)
+
+#eta <- seq(-1000,1000, by = 10) #Generate true scores
+load.R <- .6 #loading for the reference group
+load.F <- .61 #loading for focal group
+int.R <- 0 #intercept for reference group
+int.F <- 0.3 #intercept for focal group
+
+y.R <- load.R*eta.R + int.R #model-implied scores for reference group
+y.F <- load.F*eta.F+ int.F #model-implied scores for focal group
+
+datR <- data.frame(eta = eta.R, y = y.R, group = "R")
+datF <- data.frame(eta = eta.F, y = y.F, group = "F")
+dat  <- bind_rows(datR,datF) 
+
+dat %>% ggplot(aes(x = eta, y = y, color = group)) +
+  geom_line(linewidth = 1) + 
+  labs(x = "Eta",
+       y = "Estimated Response") + 
+  geom_line(data = datF, 
+            aes(x = eta, y = dnorm(eta, mean(eta), sd(eta)), color = NULL),
+            linetype = "dashed") + 
+  xlim(-3,3) +
+  ylim(0,1.2)
+
+
+
+sd.pooled.test.num <- ((length(y.R)-1)*sd(y.R)) + ((length(y.F)-1)*sd(y.F)) 
+sd.pooled.test.denom <- (length(y.R) - 1) + (length(y.F) - 1)
+sd.pooled.test <- sd.pooled.test.num/sd.pooled.test.denom
+
+#dMACS
+dMACS <- item_dmacs(load.R, #loading, R 
+                    load.F, #loading, F
+                    int.R, #intercept, R
+                    int.F, #intercept, F
+                    mean(eta.F), #mean (both groups)
+                    var(eta.F), #variance (both groups, but it would be the focal group if they didn't have the same variance)
+                    sd.pooled.test #pooled standard deviation (again, this is basically arbitrary)
+)
+
+dMACS
+
+### Means Unequal  --------------
+set.seed(7029)
+
+N.R <- 1000
+N.F <- 1000
+
+mean.R <- 0
+mean.F <- 1
+
+sd.R <- 1
+sd.F <- 1
+
+#Set up latent variable
+eta.R <- rnorm(N.R, mean.R, sd.R)
+eta.F <- rnorm(N.F, mean.F, sd.F)
+
+#eta <- seq(-1000,1000, by = 10) #Generate true scores
+load.R <- .6 #loading for the reference group
+load.F <- .61 #loading for focal group
+int.R <- 0 #intercept for reference group
+int.F <- 0.29 #intercept for focal group
+
+y.R <- load.R*eta.R + int.R #model-implied scores for reference group
+y.F <- load.F*eta.F+ int.F #model-implied scores for focal group
+
+datR <- data.frame(eta = eta.R, y = y.R, group = "R")
+datF <- data.frame(eta = eta.F, y = y.F, group = "F")
+dat  <- bind_rows(datR,datF) 
+
+dat %>% ggplot(aes(x = eta, y = y, color = group)) +
+  geom_line(linewidth = 1) + 
+  labs(x = "Eta",
+       y = "Estimated Response") + 
+  geom_line(data = datF, 
+            aes(x = eta, y = dnorm(eta, mean(eta), sd(eta)), color = NULL),
+            linetype = "dashed") + 
+  xlim(-3,3) +
+  ylim(0,1.2)
+
+
+
+sd.pooled.test.num <- ((length(y.R)-1)*sd(y.R)) + ((length(y.F)-1)*sd(y.F)) 
+sd.pooled.test.denom <- (length(y.R) - 1) + (length(y.F) - 1)
+sd.pooled.test <- sd.pooled.test.num/sd.pooled.test.denom
+
+#dMACS
+dMACS <- item_dmacs(load.R, #loading, R 
+                    load.F, #loading, F
+                    int.R, #intercept, R
+                    int.F, #intercept, F
+                    mean(eta.F), #mean (both groups)
+                    var(eta.F), #variance (both groups, but it would be the focal group if they didn't have the same variance)
+                    sd.pooled.test #pooled standard deviation (again, this is basically arbitrary)
+)
+
+dMACS
+
+}
+
+## dMACS = .90 ------------------------------
+{
+  ### Means Equal  --------------
+  set.seed(7029)
+  
+  N.R <- 1000
+  N.F <- 1000
+  
+  mean.R <- 0
+  mean.F <- 0
+  
+  sd.R <- 1
+  sd.F <- 1
+  
+  #Set up latent variable
+  eta.R <- rnorm(N.R, mean.R, sd.R)
+  eta.F <- rnorm(N.F, mean.F, sd.F)
+  
+  #eta <- seq(-1000,1000, by = 10) #Generate true scores
+  load.R <- .6 #loading for the reference group
+  load.F <- .606#loading for focal group
+  int.R <- 0 #intercept for reference group
+  int.F <- 0.55 #intercept for focal group
+  
+  y.R <- load.R*eta.R + int.R #model-implied scores for reference group
+  y.F <- load.F*eta.F+ int.F #model-implied scores for focal group
+  
+  datR <- data.frame(eta = eta.R, y = y.R, group = "R")
+  datF <- data.frame(eta = eta.F, y = y.F, group = "F")
+  dat  <- bind_rows(datR,datF) 
+  
+  dat %>% ggplot(aes(x = eta, y = y, color = group)) +
+    geom_line(linewidth = 1) + 
+    labs(x = "Eta",
+         y = "Estimated Response") + 
+    geom_line(data = datF, 
+              aes(x = eta, y = dnorm(eta, mean(eta), sd(eta)), color = NULL),
+              linetype = "dashed") + 
+    xlim(-3,3) +
+    ylim(0,1.2)
+  
+  
+  
+  sd.pooled.test.num <- ((length(y.R)-1)*sd(y.R)) + ((length(y.F)-1)*sd(y.F)) 
+  sd.pooled.test.denom <- (length(y.R) - 1) + (length(y.F) - 1)
+  sd.pooled.test <- sd.pooled.test.num/sd.pooled.test.denom
+  
+  #dMACS
+  dMACS <- item_dmacs(load.R, #loading, R 
+                      load.F, #loading, F
+                      int.R, #intercept, R
+                      int.F, #intercept, F
+                      mean(eta.F), #mean (both groups)
+                      var(eta.F), #variance (both groups, but it would be the focal group if they didn't have the same variance)
+                      sd.pooled.test #pooled standard deviation (again, this is basically arbitrary)
+  )
+  
+  dMACS
+  
+  ### Means Unequal  --------------
+  set.seed(7029)
+
+  N.R <- 1000
+  N.F <- 1000
+
+  mean.R <- 0
+  mean.F <- 1
+
+  sd.R <- 1
+  sd.F <- 1
+
+  #Set up latent variable
+  eta.R <- rnorm(N.R, mean.R, sd.R)
+  eta.F <- rnorm(N.F, mean.F, sd.F)
+
+  #eta <- seq(-1000,1000, by = 10) #Generate true scores
+  load.R <- .6 #loading for the reference group
+  load.F <- .595 #loading for focal group
+  int.R <- 0 #intercept for reference group
+  int.F <- 0.55 #intercept for focal group
+
+  y.R <- load.R*eta.R + int.R #model-implied scores for reference group
+  y.F <- load.F*eta.F+ int.F #model-implied scores for focal group
+
+  datR <- data.frame(eta = eta.R, y = y.R, group = "R")
+  datF <- data.frame(eta = eta.F, y = y.F, group = "F")
+  dat  <- bind_rows(datR,datF)
+
+  dat %>% ggplot(aes(x = eta, y = y, color = group)) +
+    geom_line(linewidth = 1) +
+    labs(x = "Eta",
+         y = "Estimated Response") +
+    geom_line(data = datF,
+              aes(x = eta, y = dnorm(eta, mean(eta), sd(eta)), color = NULL),
+              linetype = "dashed") +
+    xlim(-3,3) +
+    ylim(0,1.2)
+
+
+
+  sd.pooled.test.num <- ((length(y.R)-1)*sd(y.R)) + ((length(y.F)-1)*sd(y.F))
+  sd.pooled.test.denom <- (length(y.R) - 1) + (length(y.F) - 1)
+  sd.pooled.test <- sd.pooled.test.num/sd.pooled.test.denom
+
+  #dMACS
+  dMACS <- item_dmacs(load.R, #loading, R
+                      load.F, #loading, F
+                      int.R, #intercept, R
+                      int.F, #intercept, F
+                      mean(eta.F), #mean (both groups)
+                      var(eta.F), #variance (both groups, but it would be the focal group if they didn't have the same variance)
+                      sd.pooled.test #pooled standard deviation (again, this is basically arbitrary)
+  )
+
+  dMACS
+  
+}
+
+}
