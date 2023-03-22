@@ -221,7 +221,7 @@ dMACS <- item_dmacs(load.R, #loading, R
 
 dMACS
 
-### Means Unequal  --------------
+## Means Unequal  --------------
 set.seed(7029)
 
 N.R <- 1000
@@ -279,9 +279,9 @@ dMACS <- item_dmacs(load.R, #loading, R
 dMACS
 
 }
-## dMACS = .50 ------------------------------
+# dMACS = .50 ------------------------------
 {
-### Means Equal  --------------
+## Means Equal  --------------
 set.seed(7029)
 
 N.R <- 1000
@@ -338,7 +338,7 @@ dMACS <- item_dmacs(load.R, #loading, R
 
 dMACS
 
-### Means Unequal  --------------
+# Means Unequal  --------------
 set.seed(7029)
 
 N.R <- 1000
@@ -396,10 +396,9 @@ dMACS <- item_dmacs(load.R, #loading, R
 dMACS
 
 }
-
-## dMACS = .90 ------------------------------
+# dMACS = .90 ------------------------------
 {
-  ### Means Equal  --------------
+  ## Means Equal  --------------
   set.seed(7029)
   
   N.R <- 1000
@@ -456,7 +455,7 @@ dMACS
   
   dMACS
   
-  ### Means Unequal  --------------
+  # Means Unequal  --------------
   set.seed(7029)
 
   N.R <- 1000
