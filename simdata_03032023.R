@@ -1,3 +1,5 @@
+set.seed(3071)
+
 N.1 <- 1000
 N.2 <- 1000
 
@@ -20,7 +22,7 @@ error.inv <-sqrt(1 - load.inv^2) #This ensures variance will be 1 (provided SD g
 
 #Noninvariant loadings
 load.noninv.g2 <- .9
-error.noninv.g2 <- sqrt(1 - loading.noninv.g2^2) #This ensures variance will be 1 (provided SD given above is 1)
+error.noninv.g2 <- sqrt(1 - load.noninv.g2^2) #This ensures variance will be 1 (provided SD given above is 1)
 
 #INTERCEPT
 #Invariant intercept
@@ -43,4 +45,8 @@ y2.2 <- load.inv*eta.2 + int.inv + error.inv*rnorm(N.1, 0, 1)
 y3.2 <- load.inv*eta.2 + int.inv + error.inv*rnorm(N.1, 0, 1)
 y4.2 <- load.inv*eta.2 + int.inv + error.inv*rnorm(N.1, 0, 1)
 y5.2 <- load.inv*eta.2 + int.inv + error.inv*rnorm(N.1, 0, 1)
-y6.2 <- load.noninv.g2*eta.2 + int.noninv + error.noninv.g2*rnorm(N.1, 0, 1) #The noninvariant item
+y6.2 <- load.noninv.g2*eta.2 + int.inv + error.noninv.g2*rnorm(N.1, 0, 1) #The noninvariant item
+
+
+
+
