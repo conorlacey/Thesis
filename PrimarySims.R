@@ -154,6 +154,6 @@ for (i in 1:500){
   }
 }
 
-write.csv(dat_dMACS, file = "dat_dMACS.2.csv")
-write.csv(dat_dMACS_S, file = "dat_dMACS_S.2.csv")
+write.csv(dat_dMACS, file = "dat_dMACS.csv")
+write.csv(dat_dMACS_S, file = "dat_dMACS_S.csv")
 
