@@ -134,7 +134,6 @@ for (i in 1:500){
     dat_dMACS[i,cond] <- dMACS
     
     #dMACS_Shrunk 
-    priorPH0  <- 0.5
     sigmaSlab <- 1
     
     ybarExpl <- get.dMACS(y.R, y.F, eta.R, eta.F)
@@ -156,4 +155,3 @@ for (i in 1:500){
 
 write.csv(dat_dMACS, file = "dat_dMACS.csv")
 write.csv(dat_dMACS_S, file = "dat_dMACS_S.csv")
-
