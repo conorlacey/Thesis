@@ -40,13 +40,13 @@ for (i in 1:500){
       int.R <- 0 #intercept for reference group
       int.F <- 0.05 #intercept for focal group
     }
-    if (cond %in% c(4,5,6,13,14,15,22,23,24)){ #dMACS 0.5 mean equal
+    if (cond %in% c(4,5,6,13,14,15,22,23,24)){ #dMACS 0.2 mean equal
       load.R <- .6 #loading for the reference group
       load.F <- .61 #loading for focal group
       int.R <- 0 #intercept for reference group
       int.F <- 0.3 #intercept for focal group
     }
-    if (cond %in% c(31,32,33,40,41,42,49,50,51)){ #dMACS 0.5 mean unequal
+    if (cond %in% c(31,32,33,40,41,42,49,50,51)){ #dMACS 0.2 mean unequal
       load.R <- .6 #loading for the reference group
       load.F <- .61 #loading for focal group
       int.R <- 0 #intercept for reference group
@@ -153,5 +153,5 @@ for (i in 1:500){
   }
 }
 
-write.csv(dat_dMACS, file = "dat_dMACS.csv")
-write.csv(dat_dMACS_S, file = "dat_dMACS_S.csv")
+write.csv(dat_dMACS, file = "dat_dMACS.2.csv")
+write.csv(dat_dMACS_S, file = "dat_dMACS_S.2.csv")
