@@ -5,9 +5,27 @@ set.seed(9420)
 
 names <- c(1:54) %>% as.character()
 
+#dMACS data frames
 dat_dMACS <- matrix(nrow = 500, ncol = 54) %>% data.frame() %>% 
   setNames(c(names))
+dat_dMACS_low_CI <- matrix(nrow = 500, ncol = 54) %>% data.frame() %>% 
+  setNames(c(names))
+dat_dMACS_high_CI <- matrix(nrow = 500, ncol = 54) %>% data.frame() %>% 
+  setNames(c(names))
+dat_dMACS_post <- matrix(nrow = 500, ncol = 54) %>% data.frame() %>% 
+  setNames(c(names))
+dat_dMACS_low_CRI <- matrix(nrow = 500, ncol = 54) %>% data.frame() %>% 
+  setNames(c(names))
+dat_dMACS_high_CRI <- matrix(nrow = 500, ncol = 54) %>% data.frame() %>% 
+  setNames(c(names))
+
+
+#dMACS_Shrunk data frames
 dat_dMACS_S <- matrix(nrow = 500, ncol = 54) %>% data.frame() %>% 
+  setNames(c(names))
+dat_dMACS_S_low <-  matrix(nrow = 500, ncol = 54) %>% data.frame() %>% 
+  setNames(c(names))
+dat_dMACS_S_high <-  matrix(nrow = 500, ncol = 54) %>% data.frame() %>% 
   setNames(c(names))
 
 df <- matrix(nrow = 54, ncol = 8) %>% data.frame() %>% 
@@ -121,7 +139,7 @@ for (i in 1:500){
     sd.pooled.test.denom <- (length(y.R) - 1) + (length(y.F) - 1)
     sd.pooled.test <- sd.pooled.test.num/sd.pooled.test.denom
     
-    #dMACS
+    #dMACS CI
     dMACS <- item_dmacs(load.R, #loading, R
                         load.F, #loading, F
                         int.R, #intercept, R
@@ -130,8 +148,28 @@ for (i in 1:500){
                         var(eta.F), #variance (both groups, but it would be the focal group if they didn't have the same variance)
                         sd.pooled.test #pooled standard deviation (again, this is basically arbitrary)
     )
+    d <- dMACS
+    n <- length(y.R)
+    se <- sqrt(1 / n + d^2 / (2*n))
+    crit <- qnorm(1 - 0.05 / 2 )
+    ans <- c(d, d - se * crit, d + se * crit)
     
-    dat_dMACS[i,cond] <- dMACS
+    dat_dMACS[i,cond] <- ans[1]
+    dat_dMACS_low_CI[i,cond] <- ans[2]
+    dat_dMACS_high_CI[i,cond] < ans[3]
+    
+    #dMACS post/CRI
+    sigmaSlab <- 1
+    
+    upMAExpl <- updatePar(priorPH0, sigmaSlab, n, ans[1])
+    ciMAExpl <- postStat(upMAExpl)
+    
+    tbExplicit <- data.frame(t(c(upMAExpl, ciMAExpl)))
+    names(tbExplicit) <- c("ph0", "mu1", "sd1", "Lower", "Upper", "modelAveraged")
+    
+    dat_damcs_post <- tbExplicit[2]
+    dat_dMACS_low_CRI <- tbExplicit[4]
+    dat_dMACS_high_CRI <- tbExplicit[5]
     
     #dMACS_Shrunk 
     sigmaSlab <- 1
@@ -150,8 +188,24 @@ for (i in 1:500){
     dMACS_Shrunk <- (1-tbExplicit[1])*tbExplicit[2]
     
     dat_dMACS_S[i,cond]<- dMACS_Shrunk
+    dat_dMACS_S_low[i,cond] <- tbExplicit[4]
+    dat_dMACS_S_high[i,cond] <- tbExplicit[5]
   }
 }
 
-write.csv(dat_dMACS, file = "dat_dMACS.2.csv")
-write.csv(dat_dMACS_S, file = "dat_dMACS_S.2.csv")
+#write.csv(dat_dMACS, file = "dat_dMACS.2.csv")
+#write.csv(dat_dMACS_S, file = "dat_dMACS_S.2.csv")
+
+saveRDS(dat_dMACS, file = "dat_dMACS.RDS")
+saveRDS(dat_dMACS_low, file = "dat_dMACS_low.RDS")
+saveRDS(dat_dMACS_high, file = "dat_dMACS_high.RDS")
+
+saveRDS(dat_dMACS_post, file = "dat_dMACS_post.RDS")
+saveRDS(dat_dMACS_low_CRI, file = "dat_dMACS_low_CRI.RDS")
+saveRDS(dat_dMACS_high_CRI, file = "dat_dMACS_high_CRI.RDS")
+
+saveRDS(dat_dMACS_S, file = "dat_dMACS_S.RDS")
+saveRDS(dat_dMACS_S_low, file = "dat_dMACS_S_low.RDS")
+saveRDS(dat_dMACS_S_high, file = "dat_dMACS_S_high.RDS")
+
+
