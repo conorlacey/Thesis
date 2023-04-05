@@ -161,7 +161,7 @@ for (i in 1:500){
     #dMACS post/CRI
     sigmaSlab <- 1
     
-    upMAExpl <- updatePar(priorPH0, sigmaSlab, n, ans[1])
+    upMAExpl <- updatePar(0, sigmaSlab, n, ans[1])
     ciMAExpl <- postStat(upMAExpl)
     
     tbExplicit <- data.frame(t(c(upMAExpl, ciMAExpl)))
