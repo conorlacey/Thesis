@@ -156,7 +156,7 @@ for (i in 1:500){
     
     dat_dMACS[i,cond] <- ans[1]
     dat_dMACS_low_CI[i,cond] <- ans[2]
-    dat_dMACS_high_CI[i,cond] < ans[3]
+    dat_dMACS_high_CI[i,cond] <- ans[3]
     
     #dMACS post/CRI
     sigmaSlab <- 1
@@ -167,7 +167,7 @@ for (i in 1:500){
     tbExplicit <- data.frame(t(c(upMAExpl, ciMAExpl)))
     names(tbExplicit) <- c("ph0", "mu1", "sd1", "Lower", "Upper", "modelAveraged")
     
-    dat_damcs_post[i,cond] <- tbExplicit[2]
+    dat_dMACS_post[i,cond] <- tbExplicit[2]
     dat_dMACS_low_CRI[i,cond] <- tbExplicit[4]
     dat_dMACS_high_CRI[i,cond] <- tbExplicit[5]
     
@@ -187,7 +187,7 @@ for (i in 1:500){
     
     dMACS_Shrunk <- (1-tbExplicit[1])*tbExplicit[2]
     
-    dat_dMACS_S[i,cond]<- dMACS_Shrunk
+    dat_dMACS_S[i,cond] <- dMACS_Shrunk
     dat_dMACS_S_low[i,cond] <- tbExplicit[4]
     dat_dMACS_S_high[i,cond] <- tbExplicit[5]
   }
