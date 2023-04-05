@@ -197,8 +197,8 @@ for (i in 1:500){
 #write.csv(dat_dMACS_S, file = "dat_dMACS_S.2.csv")
 
 saveRDS(dat_dMACS, file = "dat_dMACS.RDS")
-saveRDS(dat_dMACS_low, file = "dat_dMACS_low.RDS")
-saveRDS(dat_dMACS_high, file = "dat_dMACS_high.RDS")
+saveRDS(dat_dMACS_low_CI, file = "dat_dMACS_low.RDS")
+saveRDS(dat_dMACS_high_CI, file = "dat_dMACS_high.RDS")
 
 saveRDS(dat_dMACS_post, file = "dat_dMACS_post.RDS")
 saveRDS(dat_dMACS_low_CRI, file = "dat_dMACS_low_CRI.RDS")
