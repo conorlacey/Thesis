@@ -46,13 +46,12 @@ the.data <- data.frame(RepID, dMACS_compare, dMACS_obtained, dMACS_shrunk_obtain
                        ES, SS, PP, LV)
 
 
-
 ##################################################################################
 ######################## Running the meta-models #################################
 ##################################################################################
 
 # OK, so here's what a meta-model would look like
 # Here's the model for the degree of shrinkage for dMACS_shrunk
-the.model <- lm(shrinkage_dMACS_shrunk ~ ES*SS*PP*LV)
+the.model <- lm(shrinkage_dMACS_shrunk ~ ES*SS*PP*LV, data = the.data)
 anova(the.model)
 eta_squared(the.model, partial = TRUE)
