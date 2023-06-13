@@ -76,6 +76,7 @@ updatePar <- function(rho0, v0, N, ybar) {
 }
 
 
+
 # Simulations -------------------------------------------------------------
 # measures <- matrix(nrow = 1000, ncol = 2) %>% data.frame() %>% 
 #   setNames(c("dMACS", "dMACS_Shrunk"))
@@ -160,7 +161,8 @@ dMACS_Shrunk
 
 
 
-# dMACS Conditions --------------------------------------------------------
+
+# dMACS Conditions 1 --------------------------------------------------------
 {
 ## dMACS = .10 ------------------------------
 {
@@ -516,6 +518,7 @@ dMACS
 
   
 }
+
 
 
 # dMACS Conditions 2 ------------------------------------------------------
@@ -875,3 +878,871 @@ dMACS
     }
   }
 }
+
+
+
+# dMACS Conditions 3 ------------------------------------------------------
+{
+  ## dMACS = .10 ------------------------------------------------------------
+  {
+    ### Mean Equal -----------------------------
+    {
+      set.seed(7029)
+      
+      N.R <- 1000
+      N.F <- 1000
+      
+      mean.R <- 0
+      mean.F <- 0
+      
+      sd.R <- 1
+      sd.F <- 1
+      
+      #Set up latent variable
+      eta.R <- rnorm(N.R, mean.R, sd.R)
+      eta.F <- rnorm(N.F, mean.F, sd.F)
+      
+      #eta <- seq(-1000,1000, by = 10) #Generate true scores
+      load.R <- .6 #loading for the reference group
+      load.F <- .65 #loading for focal group
+      int.R <- 0 #intercept for reference group
+      int.F <- .08 #intercept for focal group
+      
+      error.R <- sqrt(1-load.R^2)
+      error.F <- sqrt(1-load.F^2)
+      
+      y.R <- load.R*eta.R + int.R + error.R*rnorm(N.R,0,sd.R) #Observed scores for reference group
+      y.F <- load.F*eta.F + int.F + error.F*rnorm(N.F,0,sd.F) #Observed scores for focal group
+
+      datR <- data.frame(eta = eta.R, y = y.R, group = "R")
+      datF <- data.frame(eta = eta.F, y = y.F, group = "F")
+      dat  <- bind_rows(datR,datF) 
+      
+      dat %>% ggplot(aes(x = eta, y = y, color = group)) +
+        geom_point(linewidth = 1) + 
+        geom_smooth(method = "lm")
+        labs(x = "Eta",
+             y = "Estimated Response") + 
+        geom_line(data = datF, 
+                  aes(x = eta, y = dnorm(eta, mean(eta), sd(eta)), color = NULL),
+                  linetype = "dashed") + 
+        xlim(-3,3) +
+        ylim(0,1.2)
+      
+      
+      
+      sd.pooled.test.num <- ((length(y.R)-1)*sd(y.R)) + ((length(y.F)-1)*sd(y.F)) 
+      sd.pooled.test.denom <- (length(y.R) - 1) + (length(y.F) - 1)
+      sd.pooled.test <- sd.pooled.test.num/sd.pooled.test.denom
+      
+      #dMACS
+      lm.R <- lm(y.R ~ eta.R)$coefficients
+      lm.F <- lm(y.F ~ eta.F)$coefficients
+      load.R <- lm.R[2]
+      int.R <- lm.R[1]
+      load.F <- lm.F[2]
+      int.F <- lm.F[1]
+      dMACS <- item_dmacs(load.R, #loading, R 
+                          load.F, #loading, F
+                          int.R, #intercept, R
+                          int.F, #intercept, F
+                          mean(eta.F), #mean (both groups)
+                          var(eta.F), #variance (both groups, but it would be the focal group if they didn't have the same variance)
+                          sd.pooled.test #pooled standard deviation (again, this is basically arbitrary)
+      )
+      dMACS
+      
+      ybarExpl <- get.dMACS(y.R, y.F, eta.R, eta.F)
+      ybarExpl
+    }
+    
+    ## Mean Unequal -----------------------------
+    {
+        set.seed(7029)
+        
+        N.R <- 1000
+        N.F <- 1000
+        
+        mean.R <- 0
+        mean.F <- 1
+        
+        sd.R <- 1
+        sd.F <- 1
+        
+        #Set up latent variable
+        eta.R <- rnorm(N.R, mean.R, sd.R)
+        eta.F <- rnorm(N.F, mean.F, sd.F)
+        
+        #eta <- seq(-1000,1000, by = 10) #Generate true scores
+        load.R <- .6 #loading for the reference group
+        load.F <- .61 #loading for focal group
+        int.R <- 0 #intercept for reference group
+        int.F <- .08 #intercept for focal group
+        
+        error.R <- sqrt(1-load.R^2)
+        error.F <- sqrt(1-load.F^2)
+        
+        y.R <- load.R*eta.R + int.R + error.R*rnorm(N.R,0,sd.R) #Observed scores for reference group
+        y.F <- load.F*eta.F + int.F + error.F*rnorm(N.F,0,sd.F) #Observed scores for focal group
+        
+        datR <- data.frame(eta = eta.R, y = y.R, group = "R")
+        datF <- data.frame(eta = eta.F, y = y.F, group = "F")
+        dat  <- bind_rows(datR,datF) 
+        
+        dat %>% ggplot(aes(x = eta, y = y, color = group)) +
+          geom_point(linewidth = 1) + 
+          geom_smooth(method = "lm") +
+          labs(x = "Eta",
+               y = "Estimated Response") + 
+          geom_line(data = datF, 
+                    aes(x = eta, y = dnorm(eta, mean(eta), sd(eta)), color = NULL),
+                    linetype = "dashed") + 
+          xlim(-3,3) +
+          ylim(0,1.2)
+        
+        sd.pooled.test.num <- ((length(y.R)-1)*sd(y.R)) + ((length(y.F)-1)*sd(y.F)) 
+        sd.pooled.test.denom <- (length(y.R) - 1) + (length(y.F) - 1)
+        sd.pooled.test <- sd.pooled.test.num/sd.pooled.test.denom
+        
+        #dMACS
+        lm.R <- lm(y.R ~ eta.R)$coefficients
+        lm.F <- lm(y.F ~ eta.F)$coefficients
+        load.R <- lm.R[2]
+        int.R <- lm.R[1]
+        load.F <- lm.F[2]
+        int.F <- lm.F[1]
+        dMACS <- item_dmacs(load.R, #loading, R 
+                            load.F, #loading, F
+                            int.R, #intercept, R
+                            int.F, #intercept, F
+                            mean(eta.F), #mean (both groups)
+                            var(eta.F), #variance (both groups, but it would be the focal group if they didn't have the same variance)
+                            sd.pooled.test #pooled standard deviation (again, this is basically arbitrary)
+        )
+        dMACS
+        
+        ybarExpl <- get.dMACS(y.R, y.F, eta.R, eta.F)
+        ybarExpl
+    }
+  }
+  # dMACS = .50 ------------------------------------------------------------
+  {
+    ### Mean Equal -----------------------------
+    {
+      set.seed(7029)
+      
+      N.R <- 1000
+      N.F <- 1000
+      
+      mean.R <- 0
+      mean.F <- 0
+      
+      sd.R <- 1
+      sd.F <- 1
+      
+      #Set up latent variable
+      eta.R <- rnorm(N.R, mean.R, sd.R)
+      eta.F <- rnorm(N.F, mean.F, sd.F)
+      
+      #eta <- seq(-1000,1000, by = 10) #Generate true scores
+      load.R <- .6 #loading for the reference group
+      load.F <- .67 #loading for focal group
+      int.R <- 0 #intercept for reference group
+      int.F <- .49 #intercept for focal group
+      
+      error.R <- sqrt(1-load.R^2)
+      error.F <- sqrt(1-load.F^2)
+      
+      y.R <- load.R*eta.R + int.R + error.R*rnorm(N.R,0,sd.R) #Observed scores for reference group
+      y.F <- load.F*eta.F + int.F + error.F*rnorm(N.F,0,sd.F) #Observed scores for focal group
+      
+      datR <- data.frame(eta = eta.R, y = y.R, group = "R")
+      datF <- data.frame(eta = eta.F, y = y.F, group = "F")
+      dat  <- bind_rows(datR,datF) 
+      
+      dat %>% ggplot(aes(x = eta, y = y, color = group)) +
+        geom_point(linewidth = 1) + 
+        geom_smooth(method = "lm")
+      labs(x = "Eta",
+           y = "Estimated Response") + 
+        geom_line(data = datF, 
+                  aes(x = eta, y = dnorm(eta, mean(eta), sd(eta)), color = NULL),
+                  linetype = "dashed") + 
+        xlim(-3,3) +
+        ylim(0,1.2)
+      
+      
+      
+      sd.pooled.test.num <- ((length(y.R)-1)*sd(y.R)) + ((length(y.F)-1)*sd(y.F)) 
+      sd.pooled.test.denom <- (length(y.R) - 1) + (length(y.F) - 1)
+      sd.pooled.test <- sd.pooled.test.num/sd.pooled.test.denom
+      
+      #dMACS
+      lm.R <- lm(y.R ~ eta.R)$coefficients
+      lm.F <- lm(y.F ~ eta.F)$coefficients
+      load.R <- lm.R[2]
+      int.R <- lm.R[1]
+      load.F <- lm.F[2]
+      int.F <- lm.F[1]
+      dMACS <- item_dmacs(load.R, #loading, R 
+                          load.F, #loading, F
+                          int.R, #intercept, R
+                          int.F, #intercept, F
+                          mean(eta.F), #mean (both groups)
+                          var(eta.F), #variance (both groups, but it would be the focal group if they didn't have the same variance)
+                          sd.pooled.test #pooled standard deviation (again, this is basically arbitrary)
+      )
+      dMACS
+      
+      ybarExpl <- get.dMACS(y.R, y.F, eta.R, eta.F)
+      ybarExpl
+    }
+    
+    ## Mean Unequal -----------------------------
+    {
+      set.seed(7029)
+      
+      N.R <- 1000
+      N.F <- 1000
+      
+      mean.R <- 0
+      mean.F <- 1
+      
+      sd.R <- 1
+      sd.F <- 1
+      
+      #Set up latent variable
+      eta.R <- rnorm(N.R, mean.R, sd.R)
+      eta.F <- rnorm(N.F, mean.F, sd.F)
+      
+      #eta <- seq(-1000,1000, by = 10) #Generate true scores
+      load.R <- .6 #loading for the reference group
+      load.F <- .599 #loading for focal group
+      int.R <- 0 #intercept for reference group
+      int.F <- .5 #intercept for focal group
+      
+      error.R <- sqrt(1-load.R^2)
+      error.F <- sqrt(1-load.F^2)
+      
+      y.R <- load.R*eta.R + int.R + error.R*rnorm(N.R,0,sd.R) #Observed scores for reference group
+      y.F <- load.F*eta.F + int.F + error.F*rnorm(N.F,0,sd.F) #Observed scores for focal group
+      
+      datR <- data.frame(eta = eta.R, y = y.R, group = "R")
+      datF <- data.frame(eta = eta.F, y = y.F, group = "F")
+      dat  <- bind_rows(datR,datF) 
+      
+      dat %>% ggplot(aes(x = eta, y = y, color = group)) +
+        geom_point(linewidth = 1) + 
+        geom_smooth(method = "lm") +
+        labs(x = "Eta",
+             y = "Estimated Response") + 
+        geom_line(data = datF, 
+                  aes(x = eta, y = dnorm(eta, mean(eta), sd(eta)), color = NULL),
+                  linetype = "dashed") + 
+        xlim(-3,3) +
+        ylim(0,1.2)
+      
+      sd.pooled.test.num <- ((length(y.R)-1)*sd(y.R)) + ((length(y.F)-1)*sd(y.F)) 
+      sd.pooled.test.denom <- (length(y.R) - 1) + (length(y.F) - 1)
+      sd.pooled.test <- sd.pooled.test.num/sd.pooled.test.denom
+      
+      #dMACS
+      lm.R <- lm(y.R ~ eta.R)$coefficients
+      lm.F <- lm(y.F ~ eta.F)$coefficients
+      load.R <- lm.R[2]
+      int.R <- lm.R[1]
+      load.F <- lm.F[2]
+      int.F <- lm.F[1]
+      dMACS <- item_dmacs(load.R, #loading, R 
+                          load.F, #loading, F
+                          int.R, #intercept, R
+                          int.F, #intercept, F
+                          mean(eta.F), #mean (both groups)
+                          var(eta.F), #variance (both groups, but it would be the focal group if they didn't have the same variance)
+                          sd.pooled.test #pooled standard deviation (again, this is basically arbitrary)
+      )
+      dMACS
+      
+      ybarExpl <- get.dMACS(y.R, y.F, eta.R, eta.F)
+      ybarExpl
+    }
+  }
+  # dMACS = .90 ------------------------------------------------------------
+  {
+    ### Mean Equal -----------------------------
+    {
+      set.seed(7029)
+      
+      N.R <- 1000
+      N.F <- 1000
+      
+      mean.R <- 0
+      mean.F <- 0
+      
+      sd.R <- 1
+      sd.F <- 1
+      
+      #Set up latent variable
+      eta.R <- rnorm(N.R, mean.R, sd.R)
+      eta.F <- rnorm(N.F, mean.F, sd.F)
+      
+      #eta <- seq(-1000,1000, by = 10) #Generate true scores
+      load.R <- .6 #loading for the reference group
+      load.F <- .67 #loading for focal group
+      int.R <- 0 #intercept for reference group
+      int.F <- .9 #intercept for focal group
+      
+      error.R <- sqrt(1-load.R^2)
+      error.F <- sqrt(1-load.F^2)
+      
+      y.R <- load.R*eta.R + int.R + error.R*rnorm(N.R,0,sd.R) #Observed scores for reference group
+      y.F <- load.F*eta.F + int.F + error.F*rnorm(N.F,0,sd.F) #Observed scores for focal group
+      
+      datR <- data.frame(eta = eta.R, y = y.R, group = "R")
+      datF <- data.frame(eta = eta.F, y = y.F, group = "F")
+      dat  <- bind_rows(datR,datF) 
+      
+      dat %>% ggplot(aes(x = eta, y = y, color = group)) +
+        geom_point(linewidth = 1) + 
+        geom_smooth(method = "lm")
+      labs(x = "Eta",
+           y = "Estimated Response") + 
+        geom_line(data = datF, 
+                  aes(x = eta, y = dnorm(eta, mean(eta), sd(eta)), color = NULL),
+                  linetype = "dashed") + 
+        xlim(-3,3) +
+        ylim(0,1.2)
+      
+      
+      
+      sd.pooled.test.num <- ((length(y.R)-1)*sd(y.R)) + ((length(y.F)-1)*sd(y.F)) 
+      sd.pooled.test.denom <- (length(y.R) - 1) + (length(y.F) - 1)
+      sd.pooled.test <- sd.pooled.test.num/sd.pooled.test.denom
+      
+      #dMACS
+      lm.R <- lm(y.R ~ eta.R)$coefficients
+      lm.F <- lm(y.F ~ eta.F)$coefficients
+      load.R <- lm.R[2]
+      int.R <- lm.R[1]
+      load.F <- lm.F[2]
+      int.F <- lm.F[1]
+      dMACS <- item_dmacs(load.R, #loading, R 
+                          load.F, #loading, F
+                          int.R, #intercept, R
+                          int.F, #intercept, F
+                          mean(eta.F), #mean (both groups)
+                          var(eta.F), #variance (both groups, but it would be the focal group if they didn't have the same variance)
+                          sd.pooled.test #pooled standard deviation (again, this is basically arbitrary)
+      )
+      dMACS
+      
+      ybarExpl <- get.dMACS(y.R, y.F, eta.R, eta.F)
+      ybarExpl
+    }
+    
+    ## Mean Unequal -----------------------------
+    {
+      set.seed(7029)
+      
+      N.R <- 1000
+      N.F <- 1000
+      
+      mean.R <- 0
+      mean.F <- 1
+      
+      sd.R <- 1
+      sd.F <- 1
+      
+      #Set up latent variable
+      eta.R <- rnorm(N.R, mean.R, sd.R)
+      eta.F <- rnorm(N.F, mean.F, sd.F)
+      
+      #eta <- seq(-1000,1000, by = 10) #Generate true scores
+      load.R <- .6 #loading for the reference group
+      load.F <- .606 #loading for focal group
+      int.R <- 0 #intercept for reference group
+      int.F <- .9 #intercept for focal group
+      
+      error.R <- sqrt(1-load.R^2)
+      error.F <- sqrt(1-load.F^2)
+      
+      y.R <- load.R*eta.R + int.R + error.R*rnorm(N.R,0,sd.R) #Observed scores for reference group
+      y.F <- load.F*eta.F + int.F + error.F*rnorm(N.F,0,sd.F) #Observed scores for focal group
+      
+      datR <- data.frame(eta = eta.R, y = y.R, group = "R")
+      datF <- data.frame(eta = eta.F, y = y.F, group = "F")
+      dat  <- bind_rows(datR,datF) 
+      
+      dat %>% ggplot(aes(x = eta, y = y, color = group)) +
+        geom_point(linewidth = 1) + 
+        geom_smooth(method = "lm") +
+        labs(x = "Eta",
+             y = "Estimated Response") + 
+        geom_line(data = datF, 
+                  aes(x = eta, y = dnorm(eta, mean(eta), sd(eta)), color = NULL),
+                  linetype = "dashed") + 
+        xlim(-3,3) +
+        ylim(0,1.2)
+      
+      sd.pooled.test.num <- ((length(y.R)-1)*sd(y.R)) + ((length(y.F)-1)*sd(y.F)) 
+      sd.pooled.test.denom <- (length(y.R) - 1) + (length(y.F) - 1)
+      sd.pooled.test <- sd.pooled.test.num/sd.pooled.test.denom
+      
+      #dMACS
+      lm.R <- lm(y.R ~ eta.R)$coefficients
+      lm.F <- lm(y.F ~ eta.F)$coefficients
+      load.R <- lm.R[2]
+      int.R <- lm.R[1]
+      load.F <- lm.F[2]
+      int.F <- lm.F[1]
+      dMACS <- item_dmacs(load.R, #loading, R 
+                          load.F, #loading, F
+                          int.R, #intercept, R
+                          int.F, #intercept, F
+                          mean(eta.F), #mean (both groups)
+                          var(eta.F), #variance (both groups, but it would be the focal group if they didn't have the same variance)
+                          sd.pooled.test #pooled standard deviation (again, this is basically arbitrary)
+      )
+      dMACS
+      
+      ybarExpl <- get.dMACS(y.R, y.F, eta.R, eta.F)
+      ybarExpl
+    }
+  }
+
+}
+
+
+
+
+# dMACS Conditions 4 ------------------------------------------------------
+{
+  ## dMACS = .20 ------------------------------------------------------------
+  {
+    ### Mean Equal -----------------------------
+    {
+      set.seed(7029)
+      
+      N.R <- 1000
+      N.F <- 1000
+      
+      mean.R <- 0
+      mean.F <- 0
+      
+      sd.R <- 1
+      sd.F <- 1
+      
+      #Set up latent variable
+      eta.R <- rnorm(N.R, mean.R, sd.R)
+      eta.F <- rnorm(N.F, mean.F, sd.F)
+      
+      #eta <- seq(-1000,1000, by = 10) #Generate true scores
+      load.R <- .6 #loading for the reference group
+      load.F <- .67 #loading for focal group
+      int.R <- 0 #intercept for reference group
+      int.F <- .18 #intercept for focal group
+      
+      error.R <- sqrt(1-load.R^2)
+      error.F <- sqrt(1-load.F^2)
+      
+      y.R <- load.R*eta.R + int.R + error.R*rnorm(N.R,0,sd.R) #Observed scores for reference group
+      y.F <- load.F*eta.F + int.F + error.F*rnorm(N.F,0,sd.F) #Observed scores for focal group
+      
+      datR <- data.frame(eta = eta.R, y = y.R, group = "R")
+      datF <- data.frame(eta = eta.F, y = y.F, group = "F")
+      dat  <- bind_rows(datR,datF) 
+      
+      dat %>% ggplot(aes(x = eta, y = y, color = group)) +
+        geom_point(linewidth = 1) + 
+        geom_smooth(method = "lm")
+      labs(x = "Eta",
+           y = "Estimated Response") + 
+        geom_line(data = datF, 
+                  aes(x = eta, y = dnorm(eta, mean(eta), sd(eta)), color = NULL),
+                  linetype = "dashed") + 
+        xlim(-3,3) +
+        ylim(0,1.2)
+      
+      
+      
+      sd.pooled.test.num <- ((length(y.R)-1)*sd(y.R)) + ((length(y.F)-1)*sd(y.F)) 
+      sd.pooled.test.denom <- (length(y.R) - 1) + (length(y.F) - 1)
+      sd.pooled.test <- sd.pooled.test.num/sd.pooled.test.denom
+      
+      #dMACS
+      lm.R <- lm(y.R ~ eta.R)$coefficients
+      lm.F <- lm(y.F ~ eta.F)$coefficients
+      load.R <- lm.R[2]
+      int.R <- lm.R[1]
+      load.F <- lm.F[2]
+      int.F <- lm.F[1]
+      dMACS <- item_dmacs(load.R, #loading, R 
+                          load.F, #loading, F
+                          int.R, #intercept, R
+                          int.F, #intercept, F
+                          mean(eta.F), #mean (both groups)
+                          var(eta.F), #variance (both groups, but it would be the focal group if they didn't have the same variance)
+                          sd.pooled.test #pooled standard deviation (again, this is basically arbitrary)
+      )
+      dMACS
+      
+      ybarExpl <- get.dMACS(y.R, y.F, eta.R, eta.F)
+      ybarExpl
+    }
+    
+    ## Mean Unequal -----------------------------
+    {
+      set.seed(7029)
+      
+      N.R <- 1000
+      N.F <- 1000
+      
+      mean.R <- 0
+      mean.F <- 1
+      
+      sd.R <- 1
+      sd.F <- 1
+      
+      #Set up latent variable
+      eta.R <- rnorm(N.R, mean.R, sd.R)
+      eta.F <- rnorm(N.F, mean.F, sd.F)
+      
+      #eta <- seq(-1000,1000, by = 10) #Generate true scores
+      load.R <- .6 #loading for the reference group
+      load.F <- .613 #loading for focal group
+      int.R <- 0 #intercept for reference group
+      int.F <- .18 #intercept for focal group
+      
+      error.R <- sqrt(1-load.R^2)
+      error.F <- sqrt(1-load.F^2)
+      
+      y.R <- load.R*eta.R + int.R + error.R*rnorm(N.R,0,sd.R) #Observed scores for reference group
+      y.F <- load.F*eta.F + int.F + error.F*rnorm(N.F,0,sd.F) #Observed scores for focal group
+      
+      datR <- data.frame(eta = eta.R, y = y.R, group = "R")
+      datF <- data.frame(eta = eta.F, y = y.F, group = "F")
+      dat  <- bind_rows(datR,datF) 
+      
+      dat %>% ggplot(aes(x = eta, y = y, color = group)) +
+        geom_point(linewidth = 1) + 
+        geom_smooth(method = "lm") +
+        labs(x = "Eta",
+             y = "Estimated Response") + 
+        geom_line(data = datF, 
+                  aes(x = eta, y = dnorm(eta, mean(eta), sd(eta)), color = NULL),
+                  linetype = "dashed") + 
+        xlim(-3,3) +
+        ylim(0,1.2)
+      
+      sd.pooled.test.num <- ((length(y.R)-1)*sd(y.R)) + ((length(y.F)-1)*sd(y.F)) 
+      sd.pooled.test.denom <- (length(y.R) - 1) + (length(y.F) - 1)
+      sd.pooled.test <- sd.pooled.test.num/sd.pooled.test.denom
+      
+      #dMACS
+      lm.R <- lm(y.R ~ eta.R)$coefficients
+      lm.F <- lm(y.F ~ eta.F)$coefficients
+      load.R <- lm.R[2]
+      int.R <- lm.R[1]
+      load.F <- lm.F[2]
+      int.F <- lm.F[1]
+      dMACS <- item_dmacs(load.R, #loading, R 
+                          load.F, #loading, F
+                          int.R, #intercept, R
+                          int.F, #intercept, F
+                          mean(eta.F), #mean (both groups)
+                          var(eta.F), #variance (both groups, but it would be the focal group if they didn't have the same variance)
+                          sd.pooled.test #pooled standard deviation (again, this is basically arbitrary)
+      )
+      dMACS
+      
+      ybarExpl <- get.dMACS(y.R, y.F, eta.R, eta.F)
+      ybarExpl
+    }
+  }
+  # dMACS = .30 ------------------------------------------------------------
+  {
+    ### Mean Equal -----------------------------
+    {
+      set.seed(7029)
+      
+      N.R <- 1000
+      N.F <- 1000
+      
+      mean.R <- 0
+      mean.F <- 0
+      
+      sd.R <- 1
+      sd.F <- 1
+      
+      #Set up latent variable
+      eta.R <- rnorm(N.R, mean.R, sd.R)
+      eta.F <- rnorm(N.F, mean.F, sd.F)
+      
+      #eta <- seq(-1000,1000, by = 10) #Generate true scores
+      load.R <- .6 #loading for the reference group
+      load.F <- .64 #loading for focal group
+      int.R <- 0 #intercept for reference group
+      int.F <- .29 #intercept for focal group
+      
+      error.R <- sqrt(1-load.R^2)
+      error.F <- sqrt(1-load.F^2)
+      
+      y.R <- load.R*eta.R + int.R + error.R*rnorm(N.R,0,sd.R) #Observed scores for reference group
+      y.F <- load.F*eta.F + int.F + error.F*rnorm(N.F,0,sd.F) #Observed scores for focal group
+      
+      datR <- data.frame(eta = eta.R, y = y.R, group = "R")
+      datF <- data.frame(eta = eta.F, y = y.F, group = "F")
+      dat  <- bind_rows(datR,datF) 
+      
+      dat %>% ggplot(aes(x = eta, y = y, color = group)) +
+        geom_point(linewidth = 1) + 
+        geom_smooth(method = "lm")
+      labs(x = "Eta",
+           y = "Estimated Response") + 
+        geom_line(data = datF, 
+                  aes(x = eta, y = dnorm(eta, mean(eta), sd(eta)), color = NULL),
+                  linetype = "dashed") + 
+        xlim(-3,3) +
+        ylim(0,1.2)
+      
+      
+      
+      sd.pooled.test.num <- ((length(y.R)-1)*sd(y.R)) + ((length(y.F)-1)*sd(y.F)) 
+      sd.pooled.test.denom <- (length(y.R) - 1) + (length(y.F) - 1)
+      sd.pooled.test <- sd.pooled.test.num/sd.pooled.test.denom
+      
+      #dMACS
+      lm.R <- lm(y.R ~ eta.R)$coefficients
+      lm.F <- lm(y.F ~ eta.F)$coefficients
+      load.R <- lm.R[2]
+      int.R <- lm.R[1]
+      load.F <- lm.F[2]
+      int.F <- lm.F[1]
+      dMACS <- item_dmacs(load.R, #loading, R 
+                          load.F, #loading, F
+                          int.R, #intercept, R
+                          int.F, #intercept, F
+                          mean(eta.F), #mean (both groups)
+                          var(eta.F), #variance (both groups, but it would be the focal group if they didn't have the same variance)
+                          sd.pooled.test #pooled standard deviation (again, this is basically arbitrary)
+      )
+      dMACS
+      
+      ybarExpl <- get.dMACS(y.R, y.F, eta.R, eta.F)
+      ybarExpl
+    }
+    
+    ## Mean Unequal -----------------------------
+    {
+      set.seed(7029)
+      
+      N.R <- 1000
+      N.F <- 1000
+      
+      mean.R <- 0
+      mean.F <- 1
+      
+      sd.R <- 1
+      sd.F <- 1
+      
+      #Set up latent variable
+      eta.R <- rnorm(N.R, mean.R, sd.R)
+      eta.F <- rnorm(N.F, mean.F, sd.F)
+      
+      #eta <- seq(-1000,1000, by = 10) #Generate true scores
+      load.R <- .6 #loading for the reference group
+      load.F <- .594 #loading for focal group
+      int.R <- 0 #intercept for reference group
+      int.F <- .3 #intercept for focal group
+      
+      error.R <- sqrt(1-load.R^2)
+      error.F <- sqrt(1-load.F^2)
+      
+      y.R <- load.R*eta.R + int.R + error.R*rnorm(N.R,0,sd.R) #Observed scores for reference group
+      y.F <- load.F*eta.F + int.F + error.F*rnorm(N.F,0,sd.F) #Observed scores for focal group
+      
+      datR <- data.frame(eta = eta.R, y = y.R, group = "R")
+      datF <- data.frame(eta = eta.F, y = y.F, group = "F")
+      dat  <- bind_rows(datR,datF) 
+      
+      dat %>% ggplot(aes(x = eta, y = y, color = group)) +
+        geom_point(linewidth = 1) + 
+        geom_smooth(method = "lm") +
+        labs(x = "Eta",
+             y = "Estimated Response") + 
+        geom_line(data = datF, 
+                  aes(x = eta, y = dnorm(eta, mean(eta), sd(eta)), color = NULL),
+                  linetype = "dashed") + 
+        xlim(-3,3) +
+        ylim(0,1.2)
+      
+      sd.pooled.test.num <- ((length(y.R)-1)*sd(y.R)) + ((length(y.F)-1)*sd(y.F)) 
+      sd.pooled.test.denom <- (length(y.R) - 1) + (length(y.F) - 1)
+      sd.pooled.test <- sd.pooled.test.num/sd.pooled.test.denom
+      
+      #dMACS
+      lm.R <- lm(y.R ~ eta.R)$coefficients
+      lm.F <- lm(y.F ~ eta.F)$coefficients
+      load.R <- lm.R[2]
+      int.R <- lm.R[1]
+      load.F <- lm.F[2]
+      int.F <- lm.F[1]
+      dMACS <- item_dmacs(load.R, #loading, R 
+                          load.F, #loading, F
+                          int.R, #intercept, R
+                          int.F, #intercept, F
+                          mean(eta.F), #mean (both groups)
+                          var(eta.F), #variance (both groups, but it would be the focal group if they didn't have the same variance)
+                          sd.pooled.test #pooled standard deviation (again, this is basically arbitrary)
+      )
+      dMACS
+      
+      ybarExpl <- get.dMACS(y.R, y.F, eta.R, eta.F)
+      ybarExpl
+    }
+  }
+  # dMACS = .40 ------------------------------------------------------------
+  {
+    ### Mean Equal -----------------------------
+    {
+      set.seed(7029)
+      
+      N.R <- 1000
+      N.F <- 1000
+      
+      mean.R <- 0
+      mean.F <- 0
+      
+      sd.R <- 1
+      sd.F <- 1
+      
+      #Set up latent variable
+      eta.R <- rnorm(N.R, mean.R, sd.R)
+      eta.F <- rnorm(N.F, mean.F, sd.F)
+      
+      #eta <- seq(-1000,1000, by = 10) #Generate true scores
+      load.R <- .6 #loading for the reference group
+      load.F <- .655 #loading for focal group
+      int.R <- 0 #intercept for reference group
+      int.F <- .39 #intercept for focal group
+      
+      error.R <- sqrt(1-load.R^2)
+      error.F <- sqrt(1-load.F^2)
+      
+      y.R <- load.R*eta.R + int.R + error.R*rnorm(N.R,0,sd.R) #Observed scores for reference group
+      y.F <- load.F*eta.F + int.F + error.F*rnorm(N.F,0,sd.F) #Observed scores for focal group
+      
+      datR <- data.frame(eta = eta.R, y = y.R, group = "R")
+      datF <- data.frame(eta = eta.F, y = y.F, group = "F")
+      dat  <- bind_rows(datR,datF) 
+      
+      dat %>% ggplot(aes(x = eta, y = y, color = group)) +
+        geom_point(linewidth = 1) + 
+        geom_smooth(method = "lm")
+      labs(x = "Eta",
+           y = "Estimated Response") + 
+        geom_line(data = datF, 
+                  aes(x = eta, y = dnorm(eta, mean(eta), sd(eta)), color = NULL),
+                  linetype = "dashed") + 
+        xlim(-3,3) +
+        ylim(0,1.2)
+      
+      
+      
+      sd.pooled.test.num <- ((length(y.R)-1)*sd(y.R)) + ((length(y.F)-1)*sd(y.F)) 
+      sd.pooled.test.denom <- (length(y.R) - 1) + (length(y.F) - 1)
+      sd.pooled.test <- sd.pooled.test.num/sd.pooled.test.denom
+      
+      #dMACS
+      lm.R <- lm(y.R ~ eta.R)$coefficients
+      lm.F <- lm(y.F ~ eta.F)$coefficients
+      load.R <- lm.R[2]
+      int.R <- lm.R[1]
+      load.F <- lm.F[2]
+      int.F <- lm.F[1]
+      dMACS <- item_dmacs(load.R, #loading, R 
+                          load.F, #loading, F
+                          int.R, #intercept, R
+                          int.F, #intercept, F
+                          mean(eta.F), #mean (both groups)
+                          var(eta.F), #variance (both groups, but it would be the focal group if they didn't have the same variance)
+                          sd.pooled.test #pooled standard deviation (again, this is basically arbitrary)
+      )
+      dMACS
+      
+      ybarExpl <- get.dMACS(y.R, y.F, eta.R, eta.F)
+      ybarExpl
+    }
+    
+    ## Mean Unequal -----------------------------
+    {
+      set.seed(7029)
+      
+      N.R <- 1000
+      N.F <- 1000
+      
+      mean.R <- 0
+      mean.F <- 1
+      
+      sd.R <- 1
+      sd.F <- 1
+      
+      #Set up latent variable
+      eta.R <- rnorm(N.R, mean.R, sd.R)
+      eta.F <- rnorm(N.F, mean.F, sd.F)
+      
+      #eta <- seq(-1000,1000, by = 10) #Generate true scores
+      load.R <- .6 #loading for the reference group
+      load.F <- .644 #loading for focal group
+      int.R <- 0 #intercept for reference group
+      int.F <- .35 #intercept for focal group
+      
+      error.R <- sqrt(1-load.R^2)
+      error.F <- sqrt(1-load.F^2)
+      
+      y.R <- load.R*eta.R + int.R + error.R*rnorm(N.R,0,sd.R) #Observed scores for reference group
+      y.F <- load.F*eta.F + int.F + error.F*rnorm(N.F,0,sd.F) #Observed scores for focal group
+      
+      datR <- data.frame(eta = eta.R, y = y.R, group = "R")
+      datF <- data.frame(eta = eta.F, y = y.F, group = "F")
+      dat  <- bind_rows(datR,datF) 
+      
+      dat %>% ggplot(aes(x = eta, y = y, color = group)) +
+        geom_point(linewidth = 1) + 
+        geom_smooth(method = "lm") +
+        labs(x = "Eta",
+             y = "Estimated Response") + 
+        geom_line(data = datF, 
+                  aes(x = eta, y = dnorm(eta, mean(eta), sd(eta)), color = NULL),
+                  linetype = "dashed") + 
+        xlim(-3,3) +
+        ylim(0,1.2)
+      
+      sd.pooled.test.num <- ((length(y.R)-1)*sd(y.R)) + ((length(y.F)-1)*sd(y.F)) 
+      sd.pooled.test.denom <- (length(y.R) - 1) + (length(y.F) - 1)
+      sd.pooled.test <- sd.pooled.test.num/sd.pooled.test.denom
+      
+      #dMACS
+      lm.R <- lm(y.R ~ eta.R)$coefficients
+      lm.F <- lm(y.F ~ eta.F)$coefficients
+      load.R <- lm.R[2]
+      int.R <- lm.R[1]
+      load.F <- lm.F[2]
+      int.F <- lm.F[1]
+      dMACS <- item_dmacs(load.R, #loading, R 
+                          load.F, #loading, F
+                          int.R, #intercept, R
+                          int.F, #intercept, F
+                          mean(eta.F), #mean (both groups)
+                          var(eta.F), #variance (both groups, but it would be the focal group if they didn't have the same variance)
+                          sd.pooled.test #pooled standard deviation (again, this is basically arbitrary)
+      )
+      dMACS
+      
+      ybarExpl <- get.dMACS(y.R, y.F, eta.R, eta.F)
+      ybarExpl
+    }
+  }
+  
+}
+

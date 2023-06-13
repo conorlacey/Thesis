@@ -22,7 +22,7 @@ error.inv <-sqrt(1 - load.inv^2) #This ensures variance will be 1 (provided SD g
 
 #Noninvariant loadings
 load.noninv.g2 <- .9
-error.noninv.g2 <- sqrt(1 - load.noninv.g2^2) #This ensures variance will be 1 (provided SD given above is 1)
+error.noninv.g2 <- sqrt(1 - load.noninv.g2^2) #This ensures variance (of y?) will be 1 (provided SD given above is 1)
 
 #INTERCEPT
 #Invariant intercept
