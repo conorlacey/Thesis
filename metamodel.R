@@ -3,19 +3,11 @@ library(effectsize)
 
 dMACS<- readRDS(file = "data/dat_dMACS.Rev3.RDS")
 
-dMACS_obtained <- dMACS[,1]
-for (i in conds[2:54]){
-  x <- dMACS[,i]
-  dMACS_obtained <- c(dMACS_obtained,x)
-}
+dMACS_obtained <- unlist(dMACS, use.names = FALSE)
 
 dMACS_shrunk <- readRDS(file = "data/dat_dMACS_S.Rev3.RDS")
 
-dMACS_shrunk_obtained <- dMACS_shrunk[,1]
-for (i in conds[2:54]){
-  x <- dMACS_shrunk[,i]
-  dMACS_shrunk_obtained <- c(dMACS_shrunk_obtained,x)
-}
+dMACS_shrunk_obtained <- unlist(dMACS_shrunk, use.names = FALSE)
 
 #Create dMACS_compare
 dMACS_compare <- rep(c(rep(.1, 1500), rep(.5, 1500), rep(.9, 1500)),6)
