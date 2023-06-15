@@ -21,7 +21,7 @@ conds <- c(conds1,conds2,conds3,
            conds7,conds8,conds9)
 
 dMACS_obtained <- dMACS[,conds[1]]
-for (i in conds[2:54]){
+for (i in 2:54){
   x <- dMACS[,conds[i]]
   dMACS_obtained <- c(dMACS_obtained, x)
 }
@@ -46,7 +46,7 @@ conds <- c(conds1,conds2,conds3,
            conds7,conds8,conds9)
 
 dMACS_shrunk_obtained <- dMACS_shrunk[,conds[1]]
-for (i in conds[2:54]){
+for (i in 2:54){ # <- CHECK THIS OUT
   x <- dMACS_shrunk[,conds[i]]
   dMACS_shrunk_obtained <- c(dMACS_shrunk_obtained,x)
 }
@@ -75,10 +75,9 @@ LV <- rep(c(rep(1, 500), rep(2, 500)), 27)
 LV <- factor(LV, labels = c("Equal", "Unequal"))
 
 # Now let's put it all together
-the.data <- data.frame(RepID, dMACS_compare, dMACS_obtained, dMACS_shrunk_obtained,
+the.data.2 <- data.frame(RepID, dMACS_compare, dMACS_obtained, dMACS_shrunk_obtained,
                        shrinkage_dMACS, shrinkage_dMACS_shrunk,
                        ES, SS, PP, LV)
-
 
 ##################################################################################
 ######################## Running the meta-models #################################
@@ -86,6 +85,16 @@ the.data <- data.frame(RepID, dMACS_compare, dMACS_obtained, dMACS_shrunk_obtain
 
 # OK, so here's what a meta-model would look like
 # Here's the model for the degree of shrinkage for dMACS_shrunk
-the.model <- lm(shrinkage_dMACS_shrunk ~ ES*SS*PP*LV, data = the.data)
+the.model <- lm(shrinkage_dMACS_shrunk ~ ES*SS*PP*LV, data = the.data.2)
 anova(the.model)
 eta_squared(the.model, partial = TRUE)
+
+the.data %>% group_by(ES, SS, PP, LV) %>% 
+  summarize(mean = mean(dMACS_obtained) %>% 
+  round(digits = 2)) %>% 
+  View()
+
+the.data.2 %>% group_by(ES, SS, PP, LV) %>% 
+  summarize(mean = mean(dMACS_obtained) %>% 
+  round(digits = 2)) %>% 
+  View()
