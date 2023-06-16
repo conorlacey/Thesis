@@ -48,12 +48,16 @@ the.model <- lm(shrinkage_dMACS ~ ES*SS*PP*LV, data = the.data)
 anova(the.model) 
 eta_squared(the.model, partial = TRUE)
 
+the.model.c <- lm(shrinkage ~ ES*SS*PP*LV, data = the.data)
+anova(the.model.c) 
+eta_squared(the.model.c, partial = TRUE)
+
 the.data.f <- the.data %>% filter(ES == "SM")
 
 the.model.f <- lm(shrinkage_dMACS_shrunk ~ SS*PP*LV, data = the.data.f)
 anova(the.model.f) 
 eta_squared(the.model.f, partial = TRUE)
 
-the.model.c <- lm(shrinkage ~ ES*SS*PP*LV, data = the.data)
-anova(the.model.c) 
-eta_squared(the.model.c, partial = TRUE)
+the.model.c.f <- lm(shrinkage ~ SS*PP*LV, data = the.data.f)
+anova(the.model.c.f) 
+eta_squared(the.model.c.f, partial = TRUE)
