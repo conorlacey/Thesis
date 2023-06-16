@@ -61,5 +61,3 @@ eta_squared(the.model.f, partial = TRUE)
 the.model.c.f <- lm(shrinkage ~ SS*PP*LV, data = the.data.f)
 anova(the.model.c.f) 
 eta_squared(the.model.c.f, partial = TRUE)
-
-
