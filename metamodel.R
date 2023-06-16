@@ -15,6 +15,7 @@ dMACS_compare <- rep(c(rep(.1, 1500), rep(.5, 1500), rep(.9, 1500)),6)
 # OK, now we will simulate the value of shrinkage for each of the different types of dMACS
 shrinkage_dMACS <- (dMACS_compare - dMACS_obtained) / dMACS_compare
 shrinkage_dMACS_shrunk <- (dMACS_compare - dMACS_shrunk_obtained) / dMACS_compare
+shrinkage <- (dMACS_obtained - dMACS_shrunk_obtained) / dMACS_obtained
 
 # Now we will simulate the conditions
 # Simulate replication ID.
@@ -34,7 +35,7 @@ LV <- factor(LV, labels = c("Equal", "Unequal"))
 
 # Now let's put it all together
 the.data <- data.frame(RepID, dMACS_compare, dMACS_obtained, dMACS_shrunk_obtained,
-                       shrinkage_dMACS, shrinkage_dMACS_shrunk,
+                       shrinkage_dMACS, shrinkage_dMACS_shrunk, shrinkage,
                        ES, SS, PP, LV)
 
 ##################################################################################
@@ -43,6 +44,16 @@ the.data <- data.frame(RepID, dMACS_compare, dMACS_obtained, dMACS_shrunk_obtain
 
 # OK, so here's what a meta-model would look like
 # Here's the model for the degree of shrinkage for dMACS_shrunk
-the.model <- lm(shrinkage_dMACS_shrunk ~ ES*SS*PP*LV, data = the.data)
+the.model <- lm(shrinkage_dMACS ~ ES*SS*PP*LV, data = the.data)
 anova(the.model) 
 eta_squared(the.model, partial = TRUE)
+
+the.data.f <- the.data %>% filter(ES == "SM")
+
+the.model.f <- lm(shrinkage_dMACS_shrunk ~ SS*PP*LV, data = the.data.f)
+anova(the.model.f) 
+eta_squared(the.model.f, partial = TRUE)
+
+the.model.c <- lm(shrinkage ~ ES*SS*PP*LV, data = the.data)
+anova(the.model.c) 
+eta_squared(the.model.c, partial = TRUE)
